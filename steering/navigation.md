@@ -1,10 +1,20 @@
+---
+inclusion: manual
+---
+
 # Navigation — Steering Guide
 
-Use this guide when managing navigation profiles, menu items, and home pages.
+Use this when setting up or modifying navigation: home pages, menu items, login pages, and role-based routing.
 
-## Reading Navigation
+## Navigation Concepts
 
-Navigation is stored as a document in the project. Find it:
+- **Navigation Profiles** — Responsive, Phone, Tablet, and optionally Native
+- **Home Page** — The default page shown after login
+- **Role-Based Home Pages** — Override the default home page per user role
+- **Menu Items** — Hierarchical menu tree with captions and page/microflow targets
+
+## Finding the Navigation Document
+
 ```
 ped_find_document(moduleName="MyFirstModule", documentType="Navigation$NavigationProfile")
 ```
@@ -16,9 +26,11 @@ ped_find_document(moduleName="System", documentType="Navigation$NavigationDocume
 
 ## Navigation Document Structure
 
-The navigation document contains profiles (Web, Responsive, Phone, Tablet). Each profile has:
+Each profile contains:
 - `homePage` — the default page shown after login
-- `menuItemCollection` — the navigation menu items
+- `roleBasedHomePages` — list of role-specific home page overrides
+- `menuItemCollection` — the menu tree
+- `loginPage` — optional custom login page
 
 ## Adding a Menu Item
 
@@ -31,10 +43,10 @@ Key properties:
 - `caption` — display text (use `Texts$Text` element)
 - `action` — the action when clicked (typically `Pages$PageClientAction` to open a page)
 - `icon` — optional icon reference
+- `allowedRoles` — restrict visibility by role
 
 ## Setting the Home Page
 
-Update the profile's `homePage` to reference a page:
 ```
 ped_update_document(
   documentName="...",
@@ -48,7 +60,13 @@ ped_update_document(
 
 ## Role-Based Navigation
 
-Menu items can be restricted by role using `allowedRoles`. Only users with matching roles will see the item.
+Menu items can be restricted by role using `allowedRoles`. Only users with matching roles will see the item. Reference module roles as `"ModuleName.RoleName"`.
+
+## Common Workflow: New Project Setup
+
+1. Create the home page first
+2. Read the navigation profile to get its current structure
+3. Update the navigation profile to set the home page and add menu items
 
 ## After Every Change
 

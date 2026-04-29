@@ -1,38 +1,37 @@
+---
+inclusion: manual
+---
+
 # Pages — Steering Guide
 
-Use this guide when creating or modifying pages and their widgets.
+Use this when creating or modifying pages and their widgets via the MCP server.
 
-## Reading an Existing Page
+> **Important:** Before creating or modifying any page, load the `page-gen-common` MCP skill.
+> Also call `ped_list_folder` on the module root to confirm placement before creating.
+
+## MCP Tools
 
 ```
-ped_read_document(documentName="MyFirstModule.Home_Web", documentType="Pages$Page")
+ped_find_document(moduleName, "Pages$Page")               → check if exists first
+ped_get_schema(["Pages$Page"])                            → get schema
+ped_create_document([{...}])                              → create page
+ped_read_document("Module.PageName", "Pages$Page")        → read page
+ped_update_document("Pages$Page", "Module.PageName", ops) → update
+ped_check_errors([{documentType, documentName}])          → validate after every change
 ```
 
-Expand the layout and widgets:
-```
-ped_read_document(documentName="MyFirstModule.Home_Web", documentType="Pages$Page", paths=["/layoutCall", "/layoutCall/widgets"])
-```
+Always call `ped_find_document` first — if a match exists, read and update instead of creating.
 
-## Creating a Page
+## Naming Conventions
 
-Check first:
-```
-ped_find_document(moduleName="MyFirstModule", documentType="Pages$Page")
-```
+| Pattern | Example |
+|---|---|
+| Overview page | `Customer_Overview` |
+| Create/edit page | `Customer_NewEdit` |
+| Detail page | `Customer_Detail` |
+| Popup dialog | `Customer_Confirm` |
 
-Get schema:
-```
-ped_get_schema(elementTypes=["Pages$Page"])
-```
-
-Key properties:
-- `name` — page name (e.g., `"Customer_Overview"`)
-- `layout` — layout reference (e.g., `"Atlas_Core.PopupLayout"` or `"Atlas_Core.Atlas_Default"`)
-- `allowedRoles` — list of module roles that can access this page (e.g., `["MyFirstModule.User"]`)
-- `title` — display title (use `Texts$Text` element)
-- `canvasWidth` / `canvasHeight` — default `1200` / `600`
-
-## Common Layout Names
+## Common Layouts
 
 | Layout | Use |
 |---|---|
@@ -66,17 +65,40 @@ Key properties:
 
 ## Data Sources
 
-Widgets that display data need a data source. Common types:
+Widgets that display data need a data source:
 - `Pages$MicroflowSource` — calls a DS_ microflow
 - `Pages$DatabaseSource` — retrieves directly from DB with optional XPath constraint
 - `Pages$AssociationSource` — follows an association from the enclosing context
+- `Pages$PageParameterSource` — uses the page parameter (for NewEdit/Detail pages)
+- `Pages$WidgetSelectionSource` — listens to selection in another widget (master-detail)
 
 ## Page Roles
 
 Always set `allowedRoles` to restrict access. Reference module roles as `"ModuleName.RoleName"`.
 
-## After Every Change
+## Common Page Patterns
 
-```
-ped_check_errors(documents=[{"documentType": "Pages$Page", "documentName": "MyFirstModule.MyPage"}])
-```
+### Overview (List) Page
+- Layout: `Atlas_Core.Atlas_Default`
+- DataGrid2 with DatabaseSource, columns per attribute, search filters
+- "New" button → opens NewEdit page; row "Edit" → opens NewEdit with object; row "Delete" → delete microflow
+
+### NewEdit (Form) Page
+- Layout: `Atlas_Core.PopupLayout`
+- DataView with PageParameterSource bound to the page parameter
+- Input widgets per attribute type; Save/Cancel buttons in footer
+
+### Master-Detail Page
+- LayoutGrid with two columns (~35% / ~65%)
+- Left: Gallery with `selectionMode = Single` and a unique `widgetName`
+- Right: DataView with `Pages$WidgetSelectionSource` pointing to the gallery's `widgetName`
+- Set `noEntityMessage` on the DataView for the empty state
+
+## Checklist
+
+- [ ] `ped_find_document` called before creating to avoid duplicates
+- [ ] Schemas fetched with `ped_get_schema` before adding widgets
+- [ ] `allowedRoles` set — never leave a page open to all roles unless intended
+- [ ] DataView widgets have a data source
+- [ ] All targets (microflows, pages) are fully qualified (`Module.Name`)
+- [ ] `ped_check_errors` run after every create/update

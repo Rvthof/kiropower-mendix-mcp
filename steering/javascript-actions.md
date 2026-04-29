@@ -1,6 +1,12 @@
+---
+inclusion: manual
+---
+
 # JavaScript Actions — Steering Guide
 
-Use this guide when creating or modifying JavaScript actions.
+Use this when creating or modifying JavaScript actions via the MCP server.
+
+> **Important:** Load the `javascript-action` MCP skill for the full reference before working with JS actions.
 
 ## File Location
 
@@ -11,28 +17,17 @@ JavaScript actions live at:
 
 Example: `/jsactions/myfirstmodule/actions/MyAction.js`
 
-## Listing Existing Actions
+## MCP Tools
 
 ```
-glob(pattern="/jsactions/myfirstmodule/actions/*.js")
+glob(pattern="/jsactions/myfirstmodule/actions/*.js")             → list actions
+read_file(path="/jsactions/myfirstmodule/actions/MyAction.js")    → read action
+write_file(path="/jsactions/myfirstmodule/actions/MyAction.js",   → write action
+  newContent="...")
+write_file(..., span={"startLine": 10, "endLine": 20})            → update range
 ```
 
-## Reading an Action
-
-```
-read_file(path="/jsactions/myfirstmodule/actions/MyAction.js")
-```
-
-## Writing an Action
-
-```
-write_file(path="/jsactions/myfirstmodule/actions/MyAction.js", newContent="...")
-```
-
-To update a specific line range:
-```
-write_file(path="/jsactions/myfirstmodule/actions/MyAction.js", newContent="...", span={"startLine": 10, "endLine": 20})
-```
+The `ped_create_document` tool is also needed to register the action in the project model — get schema for `JavaScriptActions$JavaScriptAction` first.
 
 ## JavaScript Action Template
 
@@ -78,7 +73,6 @@ From `webactions`:
 - `ScrollTo` — scroll to a widget
 - `SetFocus` — focus a widget
 - `ReadCookie` / `SetCookie` — browser cookie management
-- `SetFavicon` — change the browser favicon
 
 From `datawidgets`:
 - `Export_To_Excel` — export data grid to Excel
@@ -92,3 +86,10 @@ Verify the file was written correctly:
 ```
 read_file(path="/jsactions/myfirstmodule/actions/MyAction.js")
 ```
+
+## Checklist
+
+- [ ] Only modify code between `BEGIN USER CODE` and `END USER CODE`
+- [ ] Return type matches the declared return type in the action definition
+- [ ] Always return a Promise
+- [ ] Import only packages available in the Mendix client runtime

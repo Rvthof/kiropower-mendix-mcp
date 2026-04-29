@@ -1,6 +1,10 @@
+---
+inclusion: manual
+---
+
 # Domain Model — Steering Guide
 
-Use this guide when creating or modifying entities, attributes, associations, and enumerations.
+Use this when creating or modifying entities, attributes, associations, and enumerations.
 
 ## Reading the Domain Model
 
@@ -55,7 +59,7 @@ ped_get_schema(elementTypes=["DomainModels$Association"])
 ```
 
 Add via `ped_update_document` on `/associations`. Key properties:
-- `parent` — reference to the "one" side entity (by name, e.g., `"MyFirstModule.Customer"`)
+- `parent` — reference to the "one" side entity (e.g., `"MyFirstModule.Customer"`)
 - `child` — reference to the "many" side entity
 - `type` — `"Reference"` (many-to-one) or `"ReferenceSet"` (many-to-many)
 - `owner` — `"Default"` (child owns) or `"Both"` (both own, for ReferenceSet)
@@ -69,12 +73,27 @@ Never associate to `System.User`. Always use `Administration.Account`:
 { "parent": "Administration.Account", "child": "MyFirstModule.MyEntity" }
 ```
 
-## Validation Rules
+## System Entity Inheritance
 
-Add validation rules after creating the entity. Get schema:
-```
-ped_get_schema(elementTypes=["DomainModels$ValidationRule"])
-```
+To create file/image entities, set `generalization`:
+- `System.FileDocument` — for file storage
+- `System.Image` — for image storage (extends FileDocument)
+
+## Creation Order
+
+Always create in dependency order:
+1. Enumerations (no dependencies)
+2. Entities (may reference enumerations)
+3. Associations (reference entities)
+4. Microflows (reference entities)
+5. Pages (reference microflows and entities)
+
+## Naming Conventions
+
+- Entities: Singular, PascalCase (`Customer`, `OrderLine`)
+- Attributes: PascalCase (`FirstName`, `OrderDate`)
+- Boolean attributes: Prefix with Is/Has/Can (`IsActive`, `HasChildren`)
+- Associations: `{FromEntity}_{ToEntity}` (`Order_Customer`)
 
 ## After Every Change
 

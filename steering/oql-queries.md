@@ -1,93 +1,116 @@
+---
+inclusion: manual
+---
+
 # OQL Queries & View Entities — Steering Guide
 
-Use this guide when working with OQL queries and view entities.
+Use this when creating or updating view entities with OQL queries.
 
-## What is a View Entity?
+> **Important:** Load the `view-entities` MCP skill for the full reference before working with OQL.
 
-A view entity is a read-only entity backed by an OQL query. It behaves like a database view — you can use it in data grids, microflows, and pages just like a regular entity, but its data comes from the OQL query rather than a direct table.
-
-## Generating OQL
-
-Use the `oql_generate` tool with a natural language description:
-```
-oql_generate(
-  moduleName="MyFirstModule",
-  userIntent="Get all customers with their total order count and latest order date"
-)
-```
-
-To write the result directly to a ViewEntitySourceDocument:
-```
-oql_generate(
-  moduleName="MyFirstModule",
-  userIntent="...",
-  documentName="MyFirstModule.CustomerSummaryView"
-)
-```
-
-To refine existing OQL:
-```
-oql_generate(
-  moduleName="MyFirstModule",
-  userIntent="Also filter to only active customers",
-  currentOql="SELECT ..."
-)
-```
-
-## Reading Existing OQL
+## MCP Tools
 
 ```
-oql_read(documentName="MyFirstModule.CustomerSummaryView")
+oql_generate(moduleName, userIntent)               → generate OQL from natural language
+oql_generate(moduleName, userIntent, documentName) → generate and write directly
+oql_read(documentName)                             → read existing OQL
+ped_find_document(moduleName, "DomainModels$ViewEntitySourceDocument") → check if exists
 ```
 
 ## Creating a View Entity
 
-1. First create the `ViewEntitySourceDocument`:
+1. Create the `ViewEntitySourceDocument` first:
 ```
-ped_find_document(moduleName="MyFirstModule", documentType="DomainModels$ViewEntitySourceDocument")
-ped_get_schema(elementTypes=["DomainModels$ViewEntitySourceDocument"])
-ped_create_document(documentType="DomainModels$ViewEntitySourceDocument", moduleName="MyFirstModule", documentName="CustomerSummaryView", documentContent={...})
-```
-
-2. Then add a view entity to the domain model that references it:
-```
-ped_get_schema(elementTypes=["DomainModels$Entity"])
-ped_update_document(documentName="MyFirstModule", documentType="DomainModels$DomainModel", operations=[{
-  "path": "/entities",
-  "operation": {
-    "type": "add",
-    "value": {
-      "$Type": "DomainModels$Entity",
-      "name": "CustomerSummary",
-      "source": {
-        "$Type": "DomainModels$OqlViewEntitySource",
-        "sourceDocument": "MyFirstModule.CustomerSummaryView"
-      },
-      "attributes": [...]
-    }
-  }
-}])
+ped_create_document(documentType="DomainModels$ViewEntitySourceDocument", moduleName="MyFirstModule",
+  documentName="CustomerSummaryView", documentContent={"$Type": "DomainModels$ViewEntitySourceDocument", "name": "CustomerSummaryView"})
 ```
 
-## OQL Syntax Basics
+2. Add the entity to the domain model referencing it:
+```json
+{
+  "$Type": "DomainModels$Entity",
+  "name": "CustomerSummaryView",
+  "source": {
+    "$Type": "DomainModels$OqlViewEntitySource",
+    "sourceDocument": "MyFirstModule.CustomerSummaryView"
+  },
+  "attributes": []
+}
+```
 
+3. Generate and write OQL:
+```
+oql_generate(moduleName="MyFirstModule", userIntent="...", documentName="MyFirstModule.CustomerSummaryView")
+```
+
+## OQL Syntax Rules
+
+### All SELECT columns MUST have explicit AS aliases
 ```sql
-SELECT
-  c/ID AS CustomerID,
-  c/Name AS CustomerName,
-  COUNT(o/ID) AS OrderCount
-FROM MyFirstModule.Customer AS c
-LEFT JOIN MyFirstModule.Order AS o ON o/Customer = c/ID
-WHERE c/Status = 'Active'
-GROUP BY c/ID, c/Name
-ORDER BY c/Name ASC
+-- WRONG
+SELECT fl.ForecastDate, fl.ProjectedIncome FROM Finance.ForecastLine AS fl
+
+-- CORRECT
+SELECT fl.ForecastDate AS ForecastDate, fl.ProjectedIncome AS ProjectedIncome
+FROM Finance.ForecastLine AS fl
 ```
 
-Key rules:
-- Use `/` as the path separator (not `.`)
-- Entity names are fully qualified: `Module.EntityName`
-- Attribute access: `alias/AttributeName`
-- Association traversal: `alias/AssociationName`
+### No ORDER BY or LIMIT at the view level
+ORDER BY and LIMIT are only valid inside correlated subqueries.
+
+### Aggregate functions must be lowercase
+```sql
+sum(o.Amount)   avg(o.Amount)   count(t.ID)   max(o.Date)   min(o.Price)
+```
+
+### Use count(entity.ID) not count(*)
+```sql
+count(t.ID)   -- CORRECT
+count(*)      -- NOT SUPPORTED
+```
+
+### Division uses colon, not slash
+```sql
+amount : quantity AS price    -- CORRECT
+amount / quantity AS price    -- WRONG
+```
+
+### Enumeration comparisons use string literals
+```sql
+WHERE t.Status = 'Active'               -- CORRECT
+WHERE t.Status = Finance.Status.Active  -- WRONG
+```
+
+### Use != not <>
+```sql
+WHERE t.Status != 'Voided'    -- CORRECT
+WHERE t.Status <> 'Voided'    -- WRONG
+```
+
+## Common Patterns
+
+**Date aggregation:**
+```sql
+SELECT datepart(YEAR, t.Date) AS Year, sum(t.Amount) AS Total
+FROM Finance.Transaction AS t
+GROUP BY datepart(YEAR, t.Date)
+```
+
+**Association navigation:**
+```sql
+SELECT o.OrderId AS OrderId, c.Name AS CustomerName
+FROM Shop.Order AS o
+INNER JOIN o/Shop.Order_Customer/Shop.Customer AS c
+```
+
+**Correlated subquery (latest price):**
+```sql
+SELECT p.Name AS Name,
+  (SELECT pr.Price FROM Shop.Price AS pr
+   WHERE pr/Shop.Price_Product = p.ID
+   ORDER BY pr.StartDate DESC LIMIT 1) AS LatestPrice
+FROM Shop.Product AS p
+```
 
 ## After Every Change
 

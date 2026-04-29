@@ -6,30 +6,6 @@ keywords: ["mendix", "mcp", "microflow", "nanoflow", "entity", "domain model", "
 author: "Workspace Power"
 ---
 
-# ⚙️ Setup Required
-
-After installing this Power, set up the following hook so that file-writing rules are automatically enforced before any write operation. Create `.kiro/hooks/file-writing-rules.json` with this content:
-
-```json
-{
-  "name": "File Writing Rules",
-  "version": "1.0.0",
-  "description": "Remind the agent to follow file-writing rules before any write operation",
-  "when": {
-    "type": "preToolUse",
-    "toolTypes": ["write"]
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Before writing this file, read and follow the rules in .kiro/steering/file-writing.md. Key points: use fsWrite for the first ~40 lines, then fsAppend for each subsequent ~40-line chunk. Never put more than ~45 lines in a single call."
-  }
-}
-```
-
-> If this hook is not in place, large file writes may be silently truncated.
-
----
-
 # Mendix MCP Development Power
 
 This power gives Kiro deep knowledge of Mendix development via the MCP server running at `localhost:7782`. It covers the full development lifecycle: domain modelling, microflows, pages, security, navigation, OQL queries, and JavaScript actions — all through structured MCP tool calls against the live `.mpr` model.
@@ -133,7 +109,7 @@ Load the appropriate steering file(s) based on what you're working on:
 ### Domain Model
 | Working on... | Load this steering file |
 |---|---|
-| Domain model, entities, associations, enumerations | `domain-model.md` |
+| Entities, attributes, associations, enumerations | `domain-model.md` |
 
 ### Microflows & Logic
 | Working on... | Load this steering file |
@@ -145,7 +121,9 @@ Load the appropriate steering file(s) based on what you're working on:
 ### Pages & UI
 | Working on... | Load this steering file |
 |---|---|
-| Pages, widgets, DATAGRID, GALLERY, DATAVIEW | `pages.md` |
+| Pages, widgets, layouts, master-detail | `pages.md` |
+| SCSS/CSS theme and styling | `theme-styling.md` |
+| Custom pluggable widgets (React/TypeScript) | `create-custom-widget.md` |
 
 ### Security & Navigation
 | Working on... | Load this steering file |
@@ -158,35 +136,35 @@ Load the appropriate steering file(s) based on what you're working on:
 |---|---|
 | OQL queries, VIEW entities | `oql-queries.md` |
 
-### JavaScript Actions
+### Data Sharing & Integrations
+| Working on... | Load this steering file |
+|---|---|
+| OData inter-app data sharing | `odata-data-sharing.md` |
+| REST API calls from microflows | `rest-integration.md` |
+| Complex REST (SPARQL, special auth, nested JSON) | `rest-sparql-integration.md` |
+| Event-driven messaging via Business Events / Kafka | `business-events.md` |
+
+### Actions
 | Working on... | Load this steering file |
 |---|---|
 | JavaScript actions | `javascript-actions.md` |
+| Java actions | `java-actions.md` |
 
-### General
+### AI Agents
 | Working on... | Load this steering file |
 |---|---|
-| Writing any file | `file-writing.md` |
+| Mendix AI agents (Mendix 11.9+) | `agents.md` |
 
-> **Hook setup required:** The `file-writing.md` steering file should be loaded automatically before any file write operation. Set it up as a `preToolUse` hook targeting `write` tools:
->
-> ```json
-> {
->   "name": "File Writing Rules",
->   "version": "1.0.0",
->   "description": "Remind the agent to follow file-writing rules before any write operation",
->   "when": {
->     "type": "preToolUse",
->     "toolTypes": ["write"]
->   },
->   "then": {
->     "type": "askAgent",
->     "prompt": "Before writing this file, read and follow the rules in .kiro/steering/file-writing.md. Key points: use fsWrite for the first ~40 lines, then fsAppend for each subsequent ~40-line chunk. Never put more than ~45 lines in a single call."
->   }
-> }
-> ```
->
-> Save this as `.kiro/hooks/file-writing-rules.json` in your workspace.
+### System Reference
+| Working on... | Load this steering file |
+|---|---|
+| System module entities (User, FileDocument, workflows) | `system-module.md` |
+
+### Migration & Assessment
+| Working on... | Load this steering file |
+|---|---|
+| Project quality audit | `assess-quality.md` |
+| Migrating a non-Mendix app | `assess-migration.md` |
 
 ---
 

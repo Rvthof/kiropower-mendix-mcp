@@ -72,7 +72,13 @@ If you changed the port in Studio Pro, update the `url` here to match.
 | Security — access rules, module roles | `ped_update_document` |
 | Navigation — menus, home pages | `ped_update_document` |
 | OQL queries and view entities | `oql_generate`, `oql_read` |
+| REST API integration | `ped_create_document`, `ped_update_document` |
+| OData inter-app data sharing | `ped_create_document`, `oql_generate` |
+| Business Events (Kafka pub/sub) | `ped_create_document`, `ped_update_document` |
 | JavaScript actions | `glob`, `read_file`, `write_file` |
+| Java actions | Kiro file tools (`Read`, `Edit`, `Write`) |
+| Mendix AI agents | `ped_create_document`, `ped_get_schema` |
+| Custom pluggable widgets | npm / widget build tools |
 | Mendix knowledge lookup | `search_mendix_knowledge_base` |
 
 ---
@@ -85,13 +91,24 @@ This power includes steering files that Kiro loads based on what you're working 
 |---|---|
 | `steering/domain-model.md` | Creating entities, attributes, associations, enumerations |
 | `steering/microflows.md` | Building microflows and nanoflows |
-| `steering/pages.md` | Creating and modifying pages and widgets |
+| `steering/patterns-crud.md` | CRUD microflow and page patterns |
+| `steering/xpath-constraints.md` | XPath syntax for retrieves and access rules |
+| `steering/pages.md` | Creating and modifying pages, widgets, and layouts |
+| `steering/theme-styling.md` | SCSS/CSS theme customization |
+| `steering/create-custom-widget.md` | Building custom pluggable widgets (React/TypeScript) |
 | `steering/security.md` | Configuring access rules and module roles |
 | `steering/navigation.md` | Managing navigation profiles and menus |
-| `steering/oql-queries.md` | Writing OQL queries and view entities |
+| `steering/oql-queries.md` | Writing OQL queries for view entities |
+| `steering/odata-data-sharing.md` | OData inter-app data sharing |
+| `steering/rest-integration.md` | Calling external REST APIs from microflows |
+| `steering/rest-sparql-integration.md` | Complex REST integrations (SPARQL, special auth, nested JSON) |
+| `steering/business-events.md` | Event-driven messaging via Business Events / Kafka |
 | `steering/javascript-actions.md` | Creating and editing JavaScript actions |
-| `steering/patterns-crud.md` | Standard CRUD microflow and page patterns |
-| `steering/xpath-constraints.md` | XPath syntax for retrieves and access rules |
+| `steering/java-actions.md` | Creating and editing Java actions |
+| `steering/agents.md` | Setting up Mendix AI agents (Mendix 11.9+) |
+| `steering/system-module.md` | System module entity reference |
+| `steering/assess-quality.md` | Auditing Mendix project quality |
+| `steering/assess-migration.md` | Assessing a non-Mendix app for migration |
 
 ---
 

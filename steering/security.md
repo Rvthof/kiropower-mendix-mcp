@@ -1,10 +1,20 @@
+---
+inclusion: manual
+---
+
 # Security — Steering Guide
 
-Use this guide when working with module roles, entity access rules, and page/microflow access.
+Use this when working with module roles, entity access rules, and page/microflow access.
+
+## Security Concepts
+
+- **Module Roles** — permissions within a single module (e.g., `Shop.Admin`, `Shop.Viewer`)
+- **User Roles** — aggregate module roles from multiple modules (e.g., `Administrator`)
+- **Access Rules** — control CRUD rights on entities per module role
+- **Project Security Level** — `Off`, `Prototype`, or `Production`
 
 ## Reading Security Configuration
 
-Module roles are defined on the domain model and individual documents. To read entity access rules:
 ```
 ped_read_document(documentName="MyFirstModule", documentType="DomainModels$DomainModel", paths=["/entities/0/accessRules"])
 ```
@@ -21,6 +31,7 @@ Key properties:
 - `allowCreate` — boolean
 - `allowDelete` — boolean
 - `memberAccesses` — per-attribute read/write permissions
+- `xpathConstraint` — optional XPath filter
 
 ## Page Access
 
@@ -50,17 +61,28 @@ ped_update_document(
 )
 ```
 
-## Module Roles
+## Common XPath Constraints for Access Rules
 
-Module roles are defined at the module level. Common roles in this project:
-- `MyFirstModule.User` — standard user role
-- `Administration.Administrator` — admin role from the Administration module
+- `[System.owner = '[%CurrentUser%]']` — user can only access records they created
+- `[Status != 'Closed']` — write access only on non-closed records
+- `[MyModule.Entity_Account = '[%CurrentUser%]']` — filter by associated account
 
-## Entity Access Best Practices
+## Security Best Practices
 
-- Always define access rules for every entity
-- Use the principle of least privilege — only grant what's needed
-- `Administration.Account` entity access is managed by the Administration module — do not modify it directly
+| Guideline | Details |
+|---|---|
+| All persistent entities must have access rules | No entity should be accessible without explicit rules |
+| Use XPath constraints | Every READ/WRITE rule on business entities should be constrained |
+| Strict security mode | Enable in Production security level |
+| No demo users in production | Remove or disable demo users before go-live |
+
+## Common Mistakes
+
+1. Creating module roles before the module exists — create the module first
+2. Forgetting to grant microflow access — pages can call microflows the user can't execute
+3. Entity access without proper member rights — use `READ *` for all members
+4. User roles without System module roles — in Production security, user roles need at least one System module role (CE0156)
+5. `Administration.Account` entity access is managed by the Administration module — do not modify it directly
 
 ## After Every Change
 

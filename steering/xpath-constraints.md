@@ -1,51 +1,56 @@
+---
+inclusion: manual
+---
+
 # XPath Constraints — Steering Guide
 
-Use this guide when writing XPath constraints for retrieve actions, data sources, and access rules.
+Use this when writing XPath constraints for retrieve actions, data sources, and access rules.
+
+> **Important:** Load the `microflow-xpath` MCP skill for the full reference before writing constraints.
+
+## XPath vs Mendix Expressions
+
+| Feature | XPath `[...]` | Mendix Expression |
+|---|---|---|
+| Use | Database filtering in retrieve activities | Calculations and logic in non-retrieve activities |
+| Boolean ops | lowercase: `and`, `or`, `not()` | `and`, `or`, `not()` |
+| Token quoting | `'[%CurrentUser%]'` (quoted) | `[%CurrentUser%]` (unquoted) |
 
 ## Basic Syntax
-
-XPath constraints filter which objects are retrieved. They go in `RetrieveAction` or `DatabaseSource` widgets.
 
 ```xpath
 [AttributeName = 'Value']
 [AttributeName != 'Value']
 [AttributeName > 100]
-[AttributeName <= 50]
 [AttributeName = empty]
 [AttributeName != empty]
+[IsActive = true()]
 ```
 
-## String Comparisons
+Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`
+
+## String Functions
 
 ```xpath
-[Name = 'John']
-[Name != 'John']
 [contains(Name, 'John')]
 [starts-with(Name, 'J')]
+[ends-with(Email, '@company.com')]
 ```
 
-## Boolean
+## Enumeration Comparisons
 
-```xpath
-[IsActive = true()]
-[IsActive = false()]
-```
-
-## Enumeration
-
+Always use the fully qualified enum value:
 ```xpath
 [Status = 'MyFirstModule.Status.Active']
 [Status != 'MyFirstModule.Status.Inactive']
 ```
-
-Always use the fully qualified enum value: `Module.EnumName.Value`
 
 ## Date/Time
 
 ```xpath
 [CreatedDate > '[%BeginOfCurrentDay%]']
 [CreatedDate < '[%EndOfCurrentDay%]']
-[CreatedDate > '[%CurrentDateTime%]']
+[OrderDate >= $StartDate and OrderDate <= $EndDate]
 ```
 
 Common tokens: `[%CurrentDateTime%]`, `[%BeginOfCurrentDay%]`, `[%EndOfCurrentDay%]`, `[%BeginOfCurrentWeek%]`, `[%BeginOfCurrentMonth%]`
@@ -54,6 +59,8 @@ Common tokens: `[%CurrentDateTime%]`, `[%BeginOfCurrentDay%]`, `[%EndOfCurrentDa
 
 ```xpath
 [MyFirstModule.Order_Customer/MyFirstModule.Customer/Name = 'Acme']
+[MyFirstModule.Order_Customer/MyFirstModule.Customer]          -- existence check
+[not(MyFirstModule.Order_Customer/MyFirstModule.Customer)]     -- no associated object
 ```
 
 Format: `[Module.AssociationName/Module.TargetEntity/Attribute = value]`
@@ -62,6 +69,7 @@ Format: `[Module.AssociationName/Module.TargetEntity/Attribute = value]`
 
 ```xpath
 [MyFirstModule.Customer_Account = '[%CurrentUser%]']
+[System.owner = '[%CurrentUser%]']
 ```
 
 ## Combining Conditions
@@ -69,25 +77,24 @@ Format: `[Module.AssociationName/Module.TargetEntity/Attribute = value]`
 ```xpath
 [Status = 'MyFirstModule.Status.Active' and CreatedDate > '[%BeginOfCurrentMonth%]']
 [Status = 'MyFirstModule.Status.Active' or Status = 'MyFirstModule.Status.Pending']
+[(Status = 'MyFirstModule.Status.Pending' or Status = 'MyFirstModule.Status.Processing') and TotalAmount >= 100]
 ```
 
-## Nested Constraints
+## Optional Filters (empty = skip)
 
 ```xpath
-[MyFirstModule.Order_Customer/MyFirstModule.Customer[Status = 'MyFirstModule.Status.Active']/ID != empty]
+[($Category = empty or MyModule.Order_Category = $Category)]
+[($ActiveOnly = false or IsActive = true) and contains(Name, $Query)]
 ```
 
-## In Retrieve Actions
+## Usage in MCP Server
 
-When setting XPath on a `RetrieveAction`, the constraint goes in the `xpathConstraint` property as a string:
+When setting XPath on a `RetrieveAction`, the constraint goes in `xpathConstraint` as a string:
 ```json
 "xpathConstraint": "[Status = 'MyFirstModule.Status.Active']"
 ```
 
-## In Access Rules
-
-Access rules use XPath to restrict which objects a role can see:
-```json
-"xpathConstraint": "[MyFirstModule.Customer_Account = '[%CurrentUser%]']"
+In security access rules, escape single quotes by doubling:
 ```
-This ensures users can only see their own records.
+'[System.owner = ''[%CurrentUser%]'']'
+```

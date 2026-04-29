@@ -139,6 +139,11 @@ Load the appropriate steering file(s) based on what you're working on:
 |---|---|
 | JavaScript actions | `javascript-actions.md` |
 
+### General
+| Working on... | Load this steering file |
+|---|---|
+| Writing any file (always active) | `file-writing.md` |
+
 ---
 
 # Core Principles (Always Apply)

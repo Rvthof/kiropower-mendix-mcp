@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "localhost-7782": {
+      "type": "http",
+      "url": "http://localhost:7782/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

@@ -10,6 +10,8 @@ author: "Workspace Power"
 
 This power gives Kiro deep knowledge of Mendix development via the MCP server running at `localhost:7782`. It covers the full development lifecycle: domain modelling, microflows, pages, security, navigation, OQL queries, and JavaScript actions — all through structured MCP tool calls against the live `.mpr` model.
 
+> **Using Mendix via MxCLI instead?** If your project uses the MxCLI binary and MDL scripts rather than the Studio Pro MCP server, use the [Mendix MxCLI Power](https://github.com/Rvthof/awskiro-mxcli-power) instead. This power is specifically for MCP-based development.
+
 ---
 
 # MCP Server Connection
@@ -169,6 +171,8 @@ Load the appropriate steering file(s) based on what you're working on:
 ---
 
 # Core Principles (Always Apply)
+
+0. **Confirm the approach: MCP vs MxCLI** — This power is for MCP-based workflows only. If the user mentions MxCLI, MDL scripts, or wants to use the `./mxcli` binary, stop and point them to the [Mendix MxCLI Power](https://github.com/Rvthof/awskiro-mxcli-power) instead. Do not use MCP tools for MxCLI-based workflows.
 
 1. **Read before writing** — always `ped_read_document` to understand current state before making changes
 2. **Describe changes in plain language** — never show raw JSON document structures in chat unless the user explicitly asks

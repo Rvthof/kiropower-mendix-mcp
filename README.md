@@ -20,6 +20,20 @@ Kiro ──MCP tools──▶ Studio Pro MCP Server (localhost:7782) ──▶ .
 
 ---
 
+## MCP or MxCLI?
+
+There are two Mendix Kiro Powers — pick the one that matches how your project talks to Mendix:
+
+| | This power — MCP | [Mendix MxCLI Power](https://github.com/Rvthof/awskiro-mxcli-power) |
+|---|---|---|
+| **Approach** | Studio Pro MCP server | CLI binary + MDL scripts |
+| **How it works** | Kiro calls Mendix Studio Pro directly through MCP | Write `.mdl` files, validate and execute via `./mxcli` |
+| **Setup** | Studio Pro MCP server running | `mxcli` binary in project root |
+
+If you're not sure which to use: if Studio Pro is running with its MCP server enabled, you're in the right place. If your project root contains an `mxcli` binary, use the MxCLI power instead.
+
+---
+
 ## Prerequisites
 
 ### 1. Enable the MCP Server in Studio Pro

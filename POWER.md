@@ -179,3 +179,9 @@ Load the appropriate steering file(s) based on what you're working on:
 3. **Batch independent schema fetches** — call `ped_get_schema` with multiple types in one call to reduce round-trips
 4. **Prefer parallel reads** — when reading multiple independent documents, read them in the same tool call batch
 5. **Stop on persistent errors** — after one failed fix attempt, report the error and suggested solution to the user and stop
+
+## License and support
+
+This power integrates with [Mendix Studio Pro MCP Server] (Apache-2.0).
+- [Privacy Policy](https://www.mendix.com/trust/mendix-and-data-privacy/)
+- [Support](https://mendix.com/support)
